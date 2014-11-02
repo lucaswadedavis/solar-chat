@@ -1,0 +1,88 @@
+$(document).ready(function(){
+    app.c.init();
+});
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+var app={};
+app.m={};
+app.v={};
+app.c={};
+app.t={};
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+app.m.mostRecentCreation=false;
+app.m.appName="Twittler";
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////begin controllers
+
+app.c.init=function(){
+  app.v.init();  
+  app.c.heartBeat();
+};
+
+
+app.c.heartBeat=function(){
+  if (app.m.mostRecentCreation!==streams.home[streams.home.length-1]['created_at']){
+      app.m.mostRecentCreation=streams.home[streams.home.length-1]['created_at'];
+  }
+  app.v.displayLatest();
+  setTimeout(function(){
+      app.c.heartBeat();
+  },3000);  
+};
+
+///////////////////////////////////////////////////////end controllers
+///////////////////////////////////////////////////////begin views
+
+app.v.init=function(){
+    $("body").html(app.t.layout() );
+    app.v.listeners();
+};
+
+app.v.displayLatest=function(){
+    
+};
+
+app.v.listeners=function(){
+    
+    
+    
+};
+
+///////////////////////////////////////////////////////end views
+///////////////////////////////////////////////////////begin templates
+
+app.t.layout=function(){
+  var d="";
+  d+="<h1>"+app.m.appName+"</h1>";
+  d+="<div id='stream'>"+app.t.stream()+"</div>";
+  return d;
+};
+
+app.t.stream=function(){
+  var d="";
+  for (var i=0;i<streams.home.length;i++){
+      d+="<div class='twittle' id='"+i+"'>";
+        d+="<span class='user'>@"+streams.home[i].user+"</span>";
+        d+="<span class='twittle'>"+streams.home[i].message+"</span>";
+      d+="</div>";
+  }
+  return d;  
+};
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+
+
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
