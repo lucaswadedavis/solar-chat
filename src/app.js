@@ -104,9 +104,9 @@ app.v.displayTweetle=function(tweetle,tweetles,canvas,bounds){
       var y=-50;
       var message=c.text(x,y,t.message);
         message.attr({
-            "opacity":1,
-            "fill":"#000",
-            "font-size":24,
+            "opacity":0,
+            "fill":"#fff",
+            "font-size":Math.floor(b.width/40),
             "text-anchor":"start"
         });
         var bBox=message.getBBox();
@@ -135,21 +135,43 @@ app.v.displayTweetle=function(tweetle,tweetles,canvas,bounds){
         var x=0;
         var y=yInterval*(i+1);
         t[i].animate({x:x,y:y},tInterval,easing);
+        t[i]['data']("background").animate({x:x,y:y-Math.floor(b.width/80)},tInterval,easing);
       }
       
+    };
+    
+    var revealTweetle=function(t){
+      var buffer=20;
+      var bbox=t[0].getBBox();
+      var r=t[0].data("background");
+      r.animate({width:bbox.width+buffer,x:bbox.x},300,"<>",function(){
+        t[0].animate({opacity:1},100);
+      });
+    }
+    
+    var removeTweetle=function(t){
+      var max=8
+      if (t.length>8){
+        t[t.length-1]['data']("background")
+        .animate({width:0},300,"<",function(){
+          this.remove();
+        });
+        t[t.length-1]
+        .animate({opacity:0},100,"<",function(){
+          this.remove();
+        });
+        t.splice(8,1);
+      }
     };
     
     var newestTweetle=Tweetle(tweetle);
     t.reverse();
     t.push(newestTweetle);
     t.reverse();
-    if (t.length>12){
-      t[t.length-1].animate({y:b.bottom+100,opacity:0},600,"<",function(){
-        this.remove();
-      });
-      t.splice(12,1);
-    }
+    
+    _.delay(removeTweetle,600,t);
     positionTweetles();
+    _.delay(revealTweetle,600,t );
 };
 
 app.v.oldDisplayLatest=function(canvas,bounds){
