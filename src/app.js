@@ -14,7 +14,8 @@ app.t={};
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 
-app.m.mostRecentCreation=false;
+app.m.periodicFetch=false;
+app.m.mostRecentCreation=0;
 app.m.tweetles=[];
 app.m.canvas=false;
 app.m.appName="Twittler";
@@ -45,8 +46,9 @@ app.v.init=function(){
     $("body").html(app.t.layout() );
     app.m.bounds=app.v.initBounds();
     app.m.canvas=app.v.initCanvas();
-    
+    app.v.pauseButton();
     app.v.listeners();
+    $("body").trigger("toggleFetch");
 };
 
 app.v.initCanvas=function(){
@@ -74,7 +76,22 @@ app.v.initBounds=function(){
   b.height=b.bottom-b.top;
 
   return b;
-}
+};
+
+app.v.pauseButton=function(){
+  var c=app.m.canvas;
+  var b=app.m.bounds;
+  var r=20;
+  var x=b.right-(1.5*r);
+  var y=b.bottom-(1.5*r);
+  c.circle(x,y,r).attr({
+    fill:"#333",
+    cursor:"pointer"
+  }).click(function(){
+    $("body").trigger("toggleFetch")
+  });
+  
+};
 
 app.v.displayTweetle=function(tweetle,tweetles,canvas,bounds){
     var c=canvas || app.m.canvas;
@@ -111,8 +128,8 @@ app.v.displayTweetle=function(tweetle,tweetles,canvas,bounds){
     var positionTweetles=function(tweetles){
       var t=tweetles || app.m.tweetles;
       
-      var tInterval=3000;
-      var easing="elastic";
+      var tInterval=600;
+      var easing="<>";
       var yInterval=b.height/(t.length+1);
       for (var i=0;i<t.length;i++){
         var x=0;
@@ -123,15 +140,14 @@ app.v.displayTweetle=function(tweetle,tweetles,canvas,bounds){
     };
     
     var newestTweetle=Tweetle(tweetle);
-    newestTweetle.animate({y:b.centerY},300);
     t.reverse();
     t.push(newestTweetle);
     t.reverse();
-    if (t.length>8){
-      t[t.length-1].animate({y:b.bottom+100},600,"<",function(){
+    if (t.length>12){
+      t[t.length-1].animate({y:b.bottom+100,opacity:0},600,"<",function(){
         this.remove();
-      })
-      t.splice(8,1);
+      });
+      t.splice(12,1);
     }
     positionTweetles();
 };
@@ -189,7 +205,23 @@ app.v.oldDisplayLatest=function(canvas,bounds){
 
 app.v.listeners=function(){
     
+  $("body").on("fetchTweetles",function(){
+    if (app.m.mostRecentCreation<streams.home.length-1){
+      app.m.mostRecentCreation++;
+      app.v.displayTweetle(streams.home[app.m.mostRecentCreation]);
+    }
+  });
     
+  $("body").on("toggleFetch",function(){
+    if (app.m.periodicFetch){
+      clearInterval(app.m.periodicFetch);
+      app.m.periodicFetch=false;
+    }else{
+      app.m.periodicFetch=setInterval(function(){
+        $("body").trigger("fetchTweetles");
+        },1500);
+    }
+  });  
     
 };
 
