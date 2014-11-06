@@ -167,7 +167,7 @@ app.v.displayTweetle=function(tweetle,tweetles,canvas,bounds){
           .attr({opacity:0,"text-anchor":"start",cursor:"pointer"});
         
         var background=c.rect(bBox.x,bBox.y,0,bBox.height)
-          .attr({"stroke-width":0,"fill":"#000","opacity":0.9})
+          .attr({"stroke-width":0,"fill":"#000","opacity":0.85})
           .toBack();
         message.data("background",background);
         message.data("user",user);
