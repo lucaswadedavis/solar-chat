@@ -18,6 +18,7 @@ app.m.periodicFetch=false;
 app.m.mostRecentCreation=0;
 app.m.tweetles=[];
 app.m.canvas=false;
+app.m.resizeLock=false;
 app.m.appName="Twittler";
 
 ///////////////////////////////////////////////////////
@@ -25,6 +26,7 @@ app.m.appName="Twittler";
 
 app.c.init=function(){
   app.v.init();  
+  app.v.listeners();
   //app.c.heartBeat();
 };
 
@@ -43,14 +45,19 @@ app.c.heartBeat=function(){
 ///////////////////////////////////////////////////////begin views
 
 app.v.init=function(){
+    if (app.m.periodicFetch){
+      clearInterval(app.m.periodicFetch);
+      app.m.periodicFetch=false;
+    }
+    app.v.css();
     $("body").html(app.t.layout() );
     app.m.bounds=app.v.initBounds();
+    var b=app.m.bounds;
     app.m.canvas=app.v.initCanvas();
     app.v.pauseButton();
-    app.v.listeners();
     
     app.v.solarSystem();
-    app.m.canvas.rect(0,0,app.m.bounds.width,app.m.bounds.height)
+    app.m.canvas.rect(b.left,b.top,b.width+100,b.height)
       .attr({"fill":"#000"})
       .animate({opacity:0},5000,"<>",function(){this.remove();})
       .toFront();
@@ -65,13 +72,13 @@ app.v.init=function(){
 
 app.v.initCanvas=function(){
   var b=app.m.bounds;
-  var c=new Raphael(0,0,b.width,b.height);  
   $("#canvas").css({
-      height:$(document).height(),
+      height:b.height-4+"px",
       padding:0,
       margin:0,
       border:0
   });
+  var c=new Raphael('canvas');  
   return c;
 };
 
@@ -266,6 +273,20 @@ app.v.listeners=function(){
     }
   });  
     
+  $(window).resize(function(){
+    if (app.m.resizeLock===false){
+      app.m.resizeLock=true;
+        setTimeout(function(){
+          $("body").html(" ");
+          app.m.canvas.clear();
+          app.m.tweetles=[];
+          app.v.init();
+          app.m.resizeLock=false;
+        },200);
+      
+    }
+  });  
+    
 };
 
 ///////////////////////////////////////////////////////end views
@@ -290,14 +311,15 @@ app.t.stream=function(){
 ///////////////////////////////////////////////////////end templates
 ///////////////////////////////////////////////////////begin css
 
-$("body").css({
-  "border":0,
-  "padding":0,
-  "margin":0,
-  "width":"100%",
-  "height":"100%"
-});
-
+app.v.css=function(){
+  $("body").css({
+    "border":0,
+    "padding":0,
+    "margin":0,
+    "width":"100%",
+    "height":"100%"
+  });
+};
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
 
