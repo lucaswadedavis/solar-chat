@@ -118,7 +118,7 @@ app.v.solarSystem=function(){
   var orbitalRadius=100;
   while (orbitalRadius<Math.max(b.height,b.width) ){
     var bodies=_.random(2,30);
-    orbitalRadius+=_.random(50,200);
+    orbitalRadius+=_.random(50,300);
       var rotation=360;
       if (Math.random()>0.5){rotation*=-1;}
       var rotationSpeed=100000*_.random(1,10);
@@ -149,9 +149,11 @@ app.v.pauseButton=function(){
     if (app.m.periodicFetch){
       this.stop();
       this.animate({"fill":"yellow"},600,"<>");
+      this.data("label").attr({text:"pause"});
     }else{
       this.stop();
       this.animate({"fill":"red"},600,"<>");
+      this.data("label").attr({text:"paused"});
     }
     var x=this.attr("cx");
     var y=this.attr("cy");
@@ -175,6 +177,7 @@ app.v.pauseButton=function(){
     this.stop();
     this.data("label").animate({opacity:0},300);
   });
+  
 };
 
 app.v.displayTweetle=function(tweetle,index,target){
@@ -182,108 +185,6 @@ app.v.displayTweetle=function(tweetle,index,target){
     
     $(target).prepend(app.t.tweetle(tweetle,index));
     $("div.tweetle").slideDown();
-};
-
-app.v.svgDisplayTweetle=function(tweetle,tweetles,canvas,bounds){
-    var c=canvas || app.m.canvas;
-    var b=bounds || app.m.bounds;
-    var t=tweetles || app.m.tweetles;
-    var s=streams;
-
-    var Tweetle=function(t){
-      var x=0;
-      var y=-50;
-      var message=c.text(x,y,t.message);
-        message.attr({
-            "opacity":0,
-            "fill":"#fff",
-            "font-size":Math.floor(b.width/40),
-            "text-anchor":"start"
-        });
-        var bBox=message.getBBox();
-        var created_at=c.text(x,y,t.created_at)
-          .attr({opacity:0,"text-anchor":"start"});
-        var user=c.text(b.right,b.centerY,"@"+t.user)
-          .attr({opacity:0,"text-anchor":"start",cursor:"pointer"});
-        
-        var background=c.rect(bBox.x,bBox.y,0,bBox.height)
-          .attr({"stroke-width":0,"fill":"#000","opacity":0.85})
-          .toBack();
-        message.data("background",background);
-        message.data("user",user);
-        message.data("created_at",created_at);
-        
-        return message;
-    };
-    
-    var positionTweetles=function(tweetles){
-      var t=tweetles || app.m.tweetles;
-      
-      var tInterval=600;
-      var easing="<>";
-      var yInterval=b.height/(t.length+1);
-      for (var i=0;i<t.length;i++){
-        var x=0;
-        var y=yInterval*(i+1);
-        t[i].animate({x:x,y:y},tInterval,easing);
-        t[i]['data']("background").animate({x:x,y:y-Math.floor(b.width/80)},tInterval,easing);
-        t[i]['data']("created_at").animate({
-          x:x,
-          y:y-Math.floor(b.width/60)-2
-        },tInterval,easing);
-        t[i]['data']("user").animate({
-          x:t[i].getBBox().x2+30,
-          y:y
-        },tInterval,easing);
-      }
-      
-    };
-    
-    var revealTweetle=function(t){
-      var buffer=20;
-      var bbox=t[0].getBBox();
-      var r=t[0].data("background");
-      var created_at=t[0].data("created_at");
-      created_at.attr({x:bbox.x,y:bbox.y+5});
-      created_at.toBack();
-      r.animate({width:bbox.width+buffer,x:bbox.x},300,"<>",function(){
-        t[0].animate({opacity:1},100);
-        created_at.animate({opacity:1,y:bbox.y-2},100);
-        t[0].data("user").animate({opacity:1},300);
-      });
-    };
-    
-    var removeTweetle=function(t){
-      var max=8;
-      if (t.length>8){
-        t[t.length-1]['data']("background")
-        .animate({width:0},300,"<>",function(){
-          this.remove();
-        });
-        t[t.length-1]['data']("created_at")
-        .animate({opacity:0},300,"<>",function(){
-          this.remove();
-        });
-        t[t.length-1]['data']("user")
-        .animate({opacity:0},300,"<>",function(){
-          this.remove();
-        });
-        t[t.length-1]
-        .animate({opacity:0},100,"<>",function(){
-          this.remove();
-        });
-        t.splice(8,1);
-      }
-    };
-    
-    var newestTweetle=Tweetle(tweetle);
-    t.reverse();
-    t.push(newestTweetle);
-    t.reverse();
-    
-    _.delay(removeTweetle,600,t);
-    positionTweetles();
-    _.delay(revealTweetle,600,t );
 };
 
 app.v.listeners=function(){
@@ -399,8 +300,8 @@ zi.config=function(){
         "color":"#fff",
         "padding":"10px",
         "border":"1px solid #333",
-        "opacity": 0.9,
-        "filter": "alpha(opacity=90)" /* For IE8 and earlier */
+        "opacity": 0.8,
+        "filter": "alpha(opacity=80)" /* For IE8 and earlier */
       },
       "div.tweetle div.created_at":{
         "text-align":"right",
