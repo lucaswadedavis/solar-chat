@@ -50,10 +50,11 @@ app.v.init=function(){
       clearInterval(app.m.periodicFetch);
       app.m.periodicFetch=false;
     }
-    zi.css();
     $("body").html(app.t.layout() );
     app.m.bounds=app.v.initBounds();
     var b=app.m.bounds;
+    
+    zi.css();
     app.m.canvas=app.v.initCanvas();
     app.v.pauseButton();
     
@@ -68,7 +69,7 @@ app.v.initialReveal=function(){
       .animate({opacity:0},5000,"<>",function(){this.remove();})
       .toFront();
     app.m.canvas.text(app.m.bounds.centerX,app.m.bounds.centerY,"TWITTLER")
-      .attr({"font-size":100,"fill":"#fff"})
+      .attr({"font-size":Math.floor(b.width/7),"fill":"#fff"})
       .animate({opacity:0},1500,"<>",function(){
         $("body").trigger("fetchTweetles");
         $("body").trigger("toggleFetch");
@@ -79,7 +80,7 @@ app.v.initialReveal=function(){
 app.v.initCanvas=function(){
   var b=app.m.bounds;
   $("#canvas").css({
-      height:b.height-4+"px",
+      height:b.height+"px",
       padding:0,
       margin:0,
       border:0
@@ -117,7 +118,7 @@ app.v.solarSystem=function(){
   var orbitalRadius=100;
   while (orbitalRadius<Math.max(b.height,b.width) ){
     var bodies=_.random(2,30);
-    orbitalRadius+=_.random(20,300);
+    orbitalRadius+=_.random(50,200);
       var rotation=360;
       if (Math.random()>0.5){rotation*=-1;}
       var rotationSpeed=100000*_.random(1,10);
@@ -128,7 +129,7 @@ app.v.solarSystem=function(){
       var r=_.random(5,20);
       var anim= Raphael.animation({transform:"r "+rotation+", "+centerPoint.x+", "+centerPoint.y+""},rotationSpeed);
       c.circle(derivedPoint.x2,derivedPoint.y2,r)
-        .attr({fill:"#111",opacity:0.7})
+        .attr({fill:"#333"})
         .animate(anim.repeat(Infinity) );
     }
   }
@@ -140,11 +141,18 @@ app.v.pauseButton=function(){
   var r=20;
   var x=b.right-(1.5*r);
   var y=b.centerY;
-  c.circle(x,y,r).attr({
-    fill:"#333",
+  var pauseButton=c.circle(x,y,r).attr({
+    fill:"yellow",
     cursor:"pointer"
   }).click(function(){
-    $("body").trigger("toggleFetch")
+    $("body").trigger("toggleFetch");
+    if (app.m.periodicFetch){
+      this.stop();
+      this.animate({"fill":"yellow"},600,"<>");
+    }else{
+      this.stop();
+      this.animate({"fill":"red"},600,"<>");
+    }
     var x=this.attr("cx");
     var y=this.attr("cy");
     var r=this.attr("r");
@@ -155,6 +163,18 @@ app.v.pauseButton=function(){
     })
   });
   
+  var label=c.text(pauseButton.attr("cx")-25,pauseButton.attr("cy"),"pause")
+    .attr({"opacity":0,'text-anchor':'end'});
+    
+  pauseButton.data("label",label);
+  
+  pauseButton.hover(function(){
+    this.stop();
+    this.data("label").animate({opacity:1},300);
+  },function(){
+    this.stop();
+    this.data("label").animate({opacity:0},300);
+  });
 };
 
 app.v.displayTweetle=function(tweetle,index,target){
@@ -302,12 +322,13 @@ app.v.listeners=function(){
   });  
   
   //keydowns
-  
+  /*
   $("body").keydown(function(){
     if (event.which===38){
      $("body").trigger("fetchTweetles"); 
     }
   });
+  */  
     
 };
 
@@ -366,11 +387,13 @@ zi.config=function(){
       "div#tweetles":{
         "position":"absolute",
         "top":"0px",
-        "left":"0px"
+        "left":"0px",
+        "margin-right":"75px"
       },
       "div.tweetle":{
         "display":"none",
         "margin":"30px",
+        "margin-right":"0px",
         "background":"#333",
         "font-family":"sans-serif",
         "color":"#fff",
@@ -390,7 +413,7 @@ zi.config=function(){
         "cursor":"pointer"
       },
       "div.tweetle div.message":{
-        "font-size":"2em"
+        "font-size":""+Math.max(1.5,(app.m.bounds.right/600))+"em"
       }
     };
     return css;
