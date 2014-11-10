@@ -16,6 +16,7 @@ app.t={};
 
 app.m.periodicFetch=false;
 app.m.mostRecentCreation=0;
+app.m.currentTweetleIndex=false; 
 app.m.tweetles=[];
 app.m.canvas=false;
 app.m.resizeLock=false;
@@ -49,7 +50,7 @@ app.v.init=function(){
       clearInterval(app.m.periodicFetch);
       app.m.periodicFetch=false;
     }
-    app.v.css();
+    zi.css();
     $("body").html(app.t.layout() );
     app.m.bounds=app.v.initBounds();
     var b=app.m.bounds;
@@ -57,6 +58,11 @@ app.v.init=function(){
     app.v.pauseButton();
     
     app.v.solarSystem();
+    app.v.initialReveal();
+};
+
+app.v.initialReveal=function(){
+    var b=app.m.bounds;
     app.m.canvas.rect(b.left,b.top,b.width+100,b.height)
       .attr({"fill":"#000"})
       .animate({opacity:0},5000,"<>",function(){this.remove();})
@@ -151,7 +157,14 @@ app.v.pauseButton=function(){
   
 };
 
-app.v.displayTweetle=function(tweetle,tweetles,canvas,bounds){
+app.v.displayTweetle=function(tweetle,index,target){
+    var target=target || "#tweetles";
+    
+    $(target).prepend(app.t.tweetle(tweetle,index));
+    $("div.tweetle").slideDown();
+};
+
+app.v.svgDisplayTweetle=function(tweetle,tweetles,canvas,bounds){
     var c=canvas || app.m.canvas;
     var b=bounds || app.m.bounds;
     var t=tweetles || app.m.tweetles;
@@ -258,7 +271,8 @@ app.v.listeners=function(){
   $("body").on("fetchTweetles",function(){
     if (app.m.mostRecentCreation<streams.home.length-1){
       app.m.mostRecentCreation++;
-      app.v.displayTweetle(streams.home[app.m.mostRecentCreation]);
+      app.m.currentTweetleIndex++;
+      app.v.displayTweetle(streams.home[app.m.mostRecentCreation],app.m.mostRecentCreation);
     }
   });
     
@@ -286,6 +300,14 @@ app.v.listeners=function(){
       
     }
   });  
+  
+  //keydowns
+  
+  $("body").keydown(function(){
+    if (event.which===38){
+     $("body").trigger("fetchTweetles"); 
+    }
+  });
     
 };
 
@@ -294,8 +316,20 @@ app.v.listeners=function(){
 
 app.t.layout=function(){
   var d="";
+  d+="<div id='tweetles'></div>";
   d+="<div id='canvas'></div>";
   return d;
+};
+
+app.t.tweetle=function(tweetle,index){
+      var d="";
+      d+="<div id='"+index+"' class='tweetle'>";
+        d+="<div class='created_at'>"+tweetle.created_at+"</div>";
+        d+="<div class='message'>"+tweetle.message+"</div>";
+        d+="<div class='user'>@"+tweetle.user+"</div>";
+      d+="</div>";
+      
+      return d;
 };
 
 app.t.stream=function(){
@@ -311,14 +345,72 @@ app.t.stream=function(){
 ///////////////////////////////////////////////////////end templates
 ///////////////////////////////////////////////////////begin css
 
-app.v.css=function(){
-  $("body").css({
-    "border":0,
-    "padding":0,
-    "margin":0,
-    "width":"100%",
-    "height":"100%"
-  });
+zi={};
+zi.config=function(){
+    var css={
+      "body":{
+        "padding":"0",
+        "margin":"0",
+        "border":"0"
+      },
+      "div#canvas":{
+        "z-index":"-1",
+        "position":"fixed",
+        "top":"0px",
+        "left":"0px",
+        "width":"100%",
+        "padding":"0",
+        "margin":"0",
+        "border":"0"
+      },
+      "div#tweetles":{
+        "position":"absolute",
+        "top":"0px",
+        "left":"0px"
+      },
+      "div.tweetle":{
+        "display":"none",
+        "margin":"30px",
+        "background":"#333",
+        "font-family":"sans-serif",
+        "color":"#fff",
+        "padding":"10px",
+        "border":"1px solid #333",
+        "opacity": 0.9,
+        "filter": "alpha(opacity=90)" /* For IE8 and earlier */
+      },
+      "div.tweetle div.created_at":{
+        "text-align":"right",
+        "font-size":"0.7em",
+        "border-bottom":"1px solid #333"
+      },
+      "div.tweetle div.user":{
+        "text-align":"right",
+        "border-top":"1px solid #333",
+        "cursor":"pointer"
+      },
+      "div.tweetle div.message":{
+        "font-size":"2em"
+      }
+    };
+    return css;
+};
+zi.transform=function(css){
+    var c="";
+    for (var selector in css){
+        c+=selector+"{";
+        for (var property in css[selector]){
+            c+=property+" : "+css[selector][property]+";";
+        }
+        c+="}";
+    }
+    return c;
+};
+zi.css=function(){
+    if ($("head#zi").length<1){
+        $("head").append("<style type='text/css' id='zi'></style>");
+    }
+    $("head style#zi").html( this.transform( this.config() ) );
 };
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
