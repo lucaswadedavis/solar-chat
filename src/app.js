@@ -254,16 +254,6 @@ app.t.tweetle=function(tweetle,index){
       return d;
 };
 
-app.t.stream=function(){
-  var d="";
-  for (var i=0;i<streams.home.length;i++){
-      d+="<div class='twittle' id='"+i+"'>";
-        d+="<span class='user'>@"+streams.home[i].user+"</span>";
-        d+="<span class='twittle'>"+streams.home[i].message+"</span>";
-      d+="</div>";
-  }
-  return d;  
-};
 ///////////////////////////////////////////////////////end templates
 ///////////////////////////////////////////////////////begin css
 
@@ -336,7 +326,7 @@ zi.css=function(){
     }
     $("head style#zi").html( this.transform( this.config() ) );
 };
-///////////////////////////////////////////////////////
+/////////////////////////////////////////////////////// end css section
 ///////////////////////////////////////////////////////
 
 
