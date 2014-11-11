@@ -70,8 +70,7 @@ app.v.initialReveal=function(){
       .toFront();
     app.m.canvas.text(app.m.bounds.centerX,app.m.bounds.centerY,"TWITTLER")
       .attr({"font-size":Math.floor(b.width/7),"fill":"#fff"})
-      .animate({opacity:0},1500,"<>",function(){
-        $("body").trigger("fetchTweetles");
+      .animate({opacity:0},3000,"<>",function(){
         $("body").trigger("toggleFetch");
         this.remove();
       }).toFront();
@@ -129,7 +128,7 @@ app.v.solarSystem=function(){
       var r=_.random(5,20);
       var anim= Raphael.animation({transform:"r "+rotation+", "+centerPoint.x+", "+centerPoint.y+""},rotationSpeed);
       c.circle(derivedPoint.x2,derivedPoint.y2,r)
-        .attr({fill:"#333"})
+        .attr({fill:"#555"})
         .animate(anim.repeat(Infinity) );
     }
   }
@@ -165,6 +164,8 @@ app.v.pauseButton=function(){
     })
   });
   
+  
+  
   var label=c.text(pauseButton.attr("cx")-25,pauseButton.attr("cy"),"pause")
     .attr({"opacity":0,'text-anchor':'end'});
     
@@ -199,13 +200,24 @@ app.v.listeners=function(){
     
   $("body").on("toggleFetch",function(){
     if (app.m.periodicFetch){
+      $("body").trigger("fetchTweetlesOff");
+    }else{
+      $("body").trigger("fetchTweetlesOn");
+    }
+  }); 
+  
+  
+  $("body").on("fetchTweetlesOff",function(){
       clearInterval(app.m.periodicFetch);
       app.m.periodicFetch=false;
-    }else{
+  });  
+  
+  
+  $("body").on("fetchTweetlesOn",function(){
+      $("body").trigger("fetchTweetles");
       app.m.periodicFetch=setInterval(function(){
         $("body").trigger("fetchTweetles");
         },3000);
-    }
   });  
     
   $(window).resize(function(){
@@ -223,13 +235,28 @@ app.v.listeners=function(){
   });  
   
   //keydowns
-  /*
+  
   $("body").keydown(function(){
-    if (event.which===38){
-     $("body").trigger("fetchTweetles"); 
+    var key=event.which;
+    console.log(key);
+    if (key!==13 && key!==16 && key!==17 && key!==18 && key!==8 && key!==9){
+      $("div#pseudomodal").fadeIn(function(){
+        $("div#pseudomodal input[type=text]").focus();
+      });
+    }
+    if (key===13 || (key===8 && $("div#pseudomodal input[type=text]").val()==="" ) ){
+      var tweetle={};
+      tweetle.user="you";
+      tweetle.created_at=new Date();
+      tweetle.message=$("div#pseudomodal input[type=text]").val();
+      if (tweetle.message){
+        app.v.displayTweetle(tweetle);
+      }
+      $("div#pseudomodal input[type=text]").val("");
+      $("div#pseudomodal").fadeOut(); 
     }
   });
-  */  
+  
     
 };
 
@@ -240,6 +267,7 @@ app.t.layout=function(){
   var d="";
   d+="<div id='tweetles'></div>";
   d+="<div id='canvas'></div>";
+  d+="<div id='pseudomodal'><input type='text'></input></div>";
   return d;
 };
 
@@ -305,6 +333,27 @@ zi.config=function(){
       },
       "div.tweetle div.message":{
         "font-size":""+Math.max(1.5,(app.m.bounds.right/600))+"em"
+      },
+      "div#pseudomodal":{
+        "display":"none",
+        "position":"fixed",
+        "width":app.m.bounds.right-120+"px",
+        "top":Math.floor(app.m.bounds.bottom/3)+"px",
+        "left":"0px",
+        "padding":"0",
+        "z-index":2,
+        "opacity":0.9,
+        "filter":"alpha(opacity=90)",
+        "margin":"60px"
+      },
+      "div#pseudomodal input[type=text]":{
+        "width":"100%",
+        "border":"1px solid #000",
+        "padding":"20px 0 20px 0",
+        "font-size":""+Math.max(1.5,(app.m.bounds.right/400))+"em",
+        "text-align":"center",
+        "background":"#000",
+        "color":"#fff"
       }
     };
     return css;
