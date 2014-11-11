@@ -28,18 +28,6 @@ app.m.appName="Twittler";
 app.c.init=function(){
   app.v.init();  
   app.v.listeners();
-  //app.c.heartBeat();
-};
-
-
-app.c.heartBeat=function(){
-  if (app.m.mostRecentCreation!==streams.home[streams.home.length-1]['created_at']){
-      app.m.mostRecentCreation=streams.home[streams.home.length-1]['created_at'];
-  }
-  app.v.displayLatest();
-  setTimeout(function(){
-      app.c.heartBeat();
-  },3000);  
 };
 
 ///////////////////////////////////////////////////////end controllers
