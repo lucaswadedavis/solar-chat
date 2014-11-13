@@ -15,9 +15,11 @@ app.t={};
 ///////////////////////////////////////////////////////
 
 app.m.periodicFetch=false;
+app.m.pauseButton=false;
 app.m.mostRecentCreation=0;
 app.m.currentTweetleIndex=false; 
 app.m.tweetles=[];
+app.m.tweetleSource=streams.home;
 app.m.canvas=false;
 app.m.resizeLock=false;
 app.m.appName="Twittler";
@@ -149,7 +151,7 @@ app.v.pauseButton=function(){
     .attr({'stroke-width':1,stroke:"#000",r:r})
     .animate({r:100,opacity:0},1000,function(){
       this.remove();
-    })
+    });
   });
   
   
@@ -167,7 +169,10 @@ app.v.pauseButton=function(){
     this.data("label").animate({opacity:0},300);
   });
   
+  app.m.pauseButton=pauseButton;
 };
+
+
 
 app.v.displayTweetle=function(tweetle,index,target){
     var target=target || "#tweetles";
@@ -192,21 +197,44 @@ app.v.listeners=function(){
     }else{
       $("body").trigger("fetchTweetlesOn");
     }
+    
+    
   }); 
   
   
   $("body").on("fetchTweetlesOff",function(){
       clearInterval(app.m.periodicFetch);
       app.m.periodicFetch=false;
+      
+      
+      app.m.pauseButton.stop();
+      app.m.pauseButton.animate({"fill":"red"},600,"<>");
+      app.m.pauseButton.data("label").attr({text:"paused"});
+      
+      
   });  
   
   
   $("body").on("fetchTweetlesOn",function(){
       $("body").trigger("fetchTweetles");
+      
+      
+      app.m.pauseButton.stop();
+      app.m.pauseButton.animate({"fill":"yellow"},300,"<>");
+      app.m.pauseButton.data("label").attr({text:"pause"});
+      
+      
       app.m.periodicFetch=setInterval(function(){
         $("body").trigger("fetchTweetles");
         },3000);
   });  
+  
+  $("body").on("displayFromUser",function(){
+    $("body").trigger("fetchTweetlesOff");
+    $("div#tweetles").html(app.t.userTweetles(app.m.selectedUser) );
+    $("div.tweetle").fadeIn();
+    $("div#tweetles h1").fadeIn();
+  });
     
   $(window).resize(function(){
     if (app.m.resizeLock===false){
@@ -222,11 +250,16 @@ app.v.listeners=function(){
     }
   });  
   
+  $("body").on("click","div#tweetles div.user",function(){
+    app.m.selectedUser=$(this).text().slice(1);
+    $("body").trigger("displayFromUser");
+  });
+  
   //keydowns
   
   $("body").keydown(function(){
     var key=event.which;
-    console.log(key);
+    //console.log(key);
     if (key!==13 && key!==16 && key!==17 && key!==18 && key!==8 && key!==9){
       $("div#pseudomodal").fadeIn(function(){
         $("div#pseudomodal input[type=text]").focus();
@@ -240,8 +273,16 @@ app.v.listeners=function(){
       if (tweetle.message){
         app.v.displayTweetle(tweetle);
       }
+      if (!streams.users[tweetle.user]){
+        streams.users[tweetle.user]=[];
+      }
+      
+      if ($("div#pseudomodal input[type=text]").val()!==""){
+        streams.users[tweetle.user].push(tweetle);
+      }
       $("div#pseudomodal input[type=text]").val("");
       $("div#pseudomodal").fadeOut(); 
+      
     }
   });
   
@@ -260,6 +301,7 @@ app.t.layout=function(){
 };
 
 app.t.tweetle=function(tweetle,index){
+      var index = index || -1;
       var d="";
       d+="<div id='"+index+"' class='tweetle'>";
         d+="<div class='created_at'>"+tweetle.created_at+"</div>";
@@ -268,6 +310,15 @@ app.t.tweetle=function(tweetle,index){
       d+="</div>";
       
       return d;
+};
+
+app.t.userTweetles=function(user){
+  var d="";
+  d+="<h1>@"+user+"</h1>";
+  for (var i=streams.users[user].length-1;i>-1;i--){
+    d+=app.t.tweetle(streams.users[user][i],i);
+  }
+  return d;
 };
 
 ///////////////////////////////////////////////////////end templates
@@ -342,6 +393,9 @@ zi.config=function(){
         "text-align":"center",
         "background":"#000",
         "color":"#fff"
+      },
+      "div#tweetles h1":{
+        "display":"none"
       }
     };
     return css;
