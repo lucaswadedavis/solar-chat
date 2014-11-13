@@ -17,7 +17,6 @@ app.t={};
 app.m.periodicFetch=false;
 app.m.pauseButton=false;
 app.m.mostRecentCreation=0;
-app.m.currentTweetleIndex=false; 
 app.m.tweetles=[];
 app.m.tweetleSource=streams.home;
 app.m.canvas=false;
@@ -40,14 +39,12 @@ app.v.init=function(){
       clearInterval(app.m.periodicFetch);
       app.m.periodicFetch=false;
     }
-    $("body").html(app.t.layout() );
     app.m.bounds=app.v.initBounds();
-    var b=app.m.bounds;
-    
     zi.css();
+    $("body").html(app.t.layout() );
     app.m.canvas=app.v.initCanvas();
+    //now here's all the stuff on the canvas
     app.v.pauseButton();
-    
     app.v.solarSystem();
     app.v.initialReveal();
 };
@@ -67,17 +64,9 @@ app.v.initialReveal=function(){
 };
 
 app.v.initCanvas=function(){
-  var b=app.m.bounds;
-  $("#canvas").css({
-      height:b.height+"px",
-      padding:0,
-      margin:0,
-      border:0
-  });
   var c=new Raphael('canvas');  
   return c;
 };
-
 
 app.v.initBounds=function(){
 	var w = window,
@@ -154,8 +143,6 @@ app.v.pauseButton=function(){
     });
   });
   
-  
-  
   var label=c.text(pauseButton.attr("cx")-25,pauseButton.attr("cy"),"pause")
     .attr({"opacity":0,'text-anchor':'end'});
     
@@ -172,11 +159,8 @@ app.v.pauseButton=function(){
   app.m.pauseButton=pauseButton;
 };
 
-
-
 app.v.displayTweetle=function(tweetle,index,target){
     var target=target || "#tweetles";
-    
     $(target).prepend(app.t.tweetle(tweetle,index));
     $("div.tweetle").slideDown();
 };
@@ -186,7 +170,6 @@ app.v.listeners=function(){
   $("body").on("fetchTweetles",function(){
     if (app.m.mostRecentCreation<streams.home.length-1){
       app.m.mostRecentCreation++;
-      app.m.currentTweetleIndex++;
       app.v.displayTweetle(streams.home[app.m.mostRecentCreation],app.m.mostRecentCreation);
     }
   });
@@ -197,33 +180,23 @@ app.v.listeners=function(){
     }else{
       $("body").trigger("fetchTweetlesOn");
     }
-    
-    
   }); 
   
   
   $("body").on("fetchTweetlesOff",function(){
       clearInterval(app.m.periodicFetch);
       app.m.periodicFetch=false;
-      
-      
       app.m.pauseButton.stop();
       app.m.pauseButton.animate({"fill":"red"},600,"<>");
       app.m.pauseButton.data("label").attr({text:"paused"});
-      
-      
   });  
   
   
   $("body").on("fetchTweetlesOn",function(){
       $("body").trigger("fetchTweetles");
-      
-      
       app.m.pauseButton.stop();
       app.m.pauseButton.animate({"fill":"yellow"},300,"<>");
       app.m.pauseButton.data("label").attr({text:"pause"});
-      
-      
       app.m.periodicFetch=setInterval(function(){
         $("body").trigger("fetchTweetles");
         },3000);
@@ -282,11 +255,9 @@ app.v.listeners=function(){
       }
       $("div#pseudomodal input[type=text]").val("");
       $("div#pseudomodal").fadeOut(); 
-      
     }
   });
   
-    
 };
 
 ///////////////////////////////////////////////////////end views
@@ -338,6 +309,7 @@ zi.config=function(){
         "top":"0px",
         "left":"0px",
         "width":"100%",
+        "height":app.m.bounds.height+"px",
         "padding":"0",
         "margin":"0",
         "border":"0"
@@ -418,9 +390,4 @@ zi.css=function(){
     $("head style#zi").html( this.transform( this.config() ) );
 };
 /////////////////////////////////////////////////////// end css section
-///////////////////////////////////////////////////////
-
-
-
-///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////
