@@ -275,7 +275,7 @@ app.t.tweetle=function(tweetle,index){
       var index = index || -1;
       var d="";
       d+="<div id='"+index+"' class='tweetle'>";
-        d+="<div class='created_at'>"+tweetle.created_at+"</div>";
+        d+="<div class='created_at'>"+moment(tweetle.created_at).fromNow()+"</div>";
         d+="<div class='message'>"+tweetle.message+"</div>";
         d+="<div class='user'>@"+tweetle.user+"</div>";
       d+="</div>";
