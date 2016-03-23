@@ -21,7 +21,7 @@ app.m.tweetles=[];
 app.m.tweetleSource=streams.home;
 app.m.canvas=false;
 app.m.resizeLock=false;
-app.m.appName="Twittler";
+app.m.appName="Solar Chat";
 
 ///////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////begin controllers
@@ -55,7 +55,7 @@ app.v.initialReveal=function(){
       .attr({"fill":"#000"})
       .animate({opacity:0},5000,"<>",function(){this.remove();})
       .toFront();
-    app.m.canvas.text(app.m.bounds.centerX,app.m.bounds.centerY,"TWITTLER")
+    app.m.canvas.text(app.m.bounds.centerX,app.m.bounds.centerY,"SOLAR CHAT")
       .attr({"font-size":Math.floor(b.width/7),"fill":"#fff"})
       .animate({opacity:0},3000,"<>",function(){
         $("body").trigger("toggleFetch");
